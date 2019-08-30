@@ -1,73 +1,36 @@
-# import time
-#
-# from selenium import webdriver
-# from selenium.webdriver.common.keys import Keys
-
-# browser = webdriver.Chrome()
-#
-# browser.get("https://m.2gis.ru/moscow/search/%D1%80%D0%B5%D1%81%D0%BD%D0%B8%D1%86%D1%8B?lang=ru&m=37.585011%2C55.774368%2F17")
-# time.sleep(1)
-#
-# elem = browser.find_element_by_tag_name("body")
-#
-# no_of_pagedowns = 20
-#
-# while no_of_pagedowns:
-#     elem.send_keys(Keys.PAGE_DOWN)
-#     time.sleep(0.2)
-#     no_of_pagedowns-=1
-#
-# post_elems = browser.find_elements_by_class_name("minicardPlain__title")
-#
-# for post in post_elems:
-#     print(post.text)
-import time
-
+import requests
+from time import sleep
 from selenium import webdriver
+from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
+from concurrent.futures.thread import ThreadPoolExecutor
+from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
-from selenium.webdriver.common.action_chains import ActionChains #- для движения мышью
-from selenium.webdriver.remote.webelement import WebElement
+url = 'https://zoon.ru/msk/m/spa_protsedury/'
+path = 'C:/Users/Обучение/Google Диск/Обучение python/2gisparser/chromedriver_32/chromedriver.exe'
+chrome_options = webdriver.ChromeOptions()
+prefs = {"profile.managed_default_content_settings.images": 2}
+chrome_options.add_experimental_option("prefs", prefs)
+driver = webdriver.Chrome(executable_path=path, options=chrome_options)
+driver.get(url)
+clicks = 8
+for click in range(0, clicks):
+    if click == clicks:
+        print('Открытие завершено')
+    else:
+        button = driver.find_element_by_xpath('//*[@id="catalogContainer"]/div[1]/div[3]/div/div[1]/div/div/div[1]/div/div[2]/div/span')
+        button.click()
+        sleep(4)
 
-driver = webdriver.Chrome('C:/Users/Обучение/Google Диск/Обучение python/2gisparser/chromedriver_32/chromedriver.exe')
+links = driver.find_elements_by_class_name('fs-largest')
+targets = []
+for link in links:
+    ActionChains(driver).move_to_element_with_offset(link, -150, 1).context_click().send_keys(Keys.CONTROL, Keys.SHIFT,
+                                                                                              'i').perform()
+    targets.append(link.get_attribute("href"))
 
-driver.get("https://m.2gis.ru/moscow/search/%D1%80%D0%B5%D1%81%D0%BD%D0%B8%D1%86%D1%8B?lang=ru")
-button = driver.find_element_by_class_name('searchResults__content')
-button.click()
-time.sleep(1)
-
-elem = driver.find_elements_by_class_name("minicardPlain__title")
-
-no_of_pagedowns = 20
-
-while no_of_pagedowns:
-    elem.send_keys(Keys.PAGE_DOWN)
-    time.sleep(0.2)
-    no_of_pagedowns-=1
-
-post_elems = browser.find_elements_by_class_name("minicardPlain__title")
-
-for post in post_elems:
-    print(post.text)
-
-
-# Пример из документации
-
-'''import time
-from selenium import webdriver
-import selenium.webdriver.chrome.service as service
-service = service.Service('/path/to/chromedriver')
-service.start()
-capabilities = {'chrome.binary': '/path/to/custom/chrome'}
-driver = webdriver.Remote(service.service_url, capabilities)
-driver.get('http://www.google.com/xhtml');
-time.sleep(5) # Let the user actually see something!
-driver.quit()'''
-
-
-Actions oAction = new Actions(driver);
-oAction.moveToElement(Webelement);
-oAction.contextClick(Webelement).build().perform();  /* this will perform right click */
-WebElement elementOpen = driver.findElement(By.linkText("Open")); /*This will select menu after right click */
-
-elementOpen.click();
+//*[@id="u8385931"]/li[1]/div[1]/div[2]
