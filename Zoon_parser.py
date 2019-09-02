@@ -19,21 +19,24 @@ def take_proxy():
     pass
 
 
-def get_urls_from_page(url, object):
+def get_urls_from_page(object, driver):
     # Дописать параметр сессии, для того
     # чтобы реквестом получать информацию с селениума
-    ua = UserAgent()
-    header = {'User-Agent': str(ua.chrome)}
-    html = requests.get(url, headers=header).text
+    driver = driver
+    find_html = driver.find_element_by_tag_name('html')
+    html = find_html.get_attribute('innerHTML')
     soup = BeautifulSoup(html, 'html.parser')
-    pages = soup.find_all(attrs={"class": "fs-largest invisible-links"})
-    for page in pages:
-        object.urls.append(page.next_element.next_element.attrs['href'])
+    hrefs = soup.find_all(attrs={'class': 'fs-largest invisible-links'})
+    for hr in hrefs:
+        object.urls.append(hr.find('a').get('href'))
 
 
 def get_info_from_page(url, object):
-    html = requests.get(url).text
+    ua = UserAgent()
+    header = {'User-Agent': str(ua.chrome)}
+    html = requests.get(url, headers=header).text
     ads = BeautifulSoup(html, 'html.parser')
+
     try:
         phone = ads.find(attrs={'class': 'js-phone phoneView phone-hidden'}).find('a').get('href').split('+')[1]
     except:
@@ -51,6 +54,7 @@ def get_info_from_page(url, object):
                 'site': site
                 }
     object.flats.append(ads_dict)
+    print(ads_dict)
 
 
 class Ads:
@@ -90,7 +94,7 @@ def main():
     driver = webdriver.Chrome(executable_path=path, options=chrome_options)
     driver.get(url)
     click_more(url, driver)
-    get_urls_from_page(url, object)
+    get_urls_from_page(object, driver)
     with ThreadPoolExecutor(max_workers=1) as executor:
         for url in object.urls:
             future = executor.submit(get_info_from_page, url, object)
