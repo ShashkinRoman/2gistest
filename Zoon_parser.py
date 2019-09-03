@@ -4,6 +4,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from concurrent.futures.thread import ThreadPoolExecutor
+from torrequest import TorRequest
 
 # from sqlalchemy import Column, Integer, String
 # from sqlalchemy.ext.declarative import declarative_base
@@ -34,7 +35,9 @@ def get_urls_from_page(object, driver):
 def get_info_from_page(url, object):
     ua = UserAgent()
     header = {'User-Agent': str(ua.chrome)}
-    html = requests.get(url, headers=header).text
+    # С помощью torrequests делаем запросы через тор
+    with TorRequest() as tr:
+        html = tr.get(url, headers=header).text
     ads = BeautifulSoup(html, 'html.parser')
 
     try:
@@ -95,11 +98,10 @@ def main():
     driver.get(url)
     click_more(url, driver)
     get_urls_from_page(object, driver)
-    with ThreadPoolExecutor(max_workers=1) as executor:
+    with ThreadPoolExecutor(max_workers=25) as executor:
         for url in object.urls:
             future = executor.submit(get_info_from_page, url, object)
             print(future)
-            sleep(1)
 
 
 

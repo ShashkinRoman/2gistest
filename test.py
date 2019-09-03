@@ -33,4 +33,11 @@ for link in links:
                                                                                               'i').perform()
     targets.append(link.get_attribute("href"))
 
-//*[@id="u8385931"]/li[1]/div[1]/div[2]
+
+
+while a:
+    b = a.pop()
+    print(b)
+    if b == 3:
+        a.append(b)
+        break
